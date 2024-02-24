@@ -1,4 +1,4 @@
-package com.example.carsharing.dto;
+package com.example.carsharing.dto.car;
 
 public record CarWithShortInfoDto(
         Long id,

@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: create-cars-table
+      id: create-users-table
       author: Roma Menzheres
       changes:
         - createTable:
-            tableName: cars
+            tableName: users
             columns:
               - column:
                   name: id
@@ -14,33 +14,29 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: brand
+                  name: first_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: model
+                  name: last_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: type
-                  type: enum('SEDAN', 'SUV', 'HATCHBACK', 'UNIVERSAL')
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: inventory
-                  type: int
+                  name: role
+                  type: enum('CUSTOMER', 'MANAGER')
                   constraints:
                     nullable: false
-              - column:
-                  name: daily_fee
-                  type: DECIMAL(11,2)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: is_deleted
-                  type: boolean
-                  defaultValue: 'false'
-                  constraints:
-                    nullable: false
+
