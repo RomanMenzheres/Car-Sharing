@@ -42,6 +42,6 @@ public class Car {
         SEDAN,
         SUV,
         HATCHBACK,
-        UNIVERSAL
+        STATION_WAGON
     }
 }

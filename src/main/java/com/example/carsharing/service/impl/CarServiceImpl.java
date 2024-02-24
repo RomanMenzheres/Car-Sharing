@@ -34,13 +34,8 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public CarDto findById(Long id) {
-        return carMapper.toDto(
-                carRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Can't find car with id: " + id)
-                        )
-        );
+        return carMapper.toDto(carRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find car with id: " + id)));
     }
 
     @Override
