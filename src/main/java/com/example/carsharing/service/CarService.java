@@ -1,7 +1,7 @@
 package com.example.carsharing.service;
 
 import com.example.carsharing.dto.CarDto;
-import com.example.carsharing.dto.CarDtoWithShortInfo;
+import com.example.carsharing.dto.CarWithShortInfoDto;
 import com.example.carsharing.dto.CreateCarRequestDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface CarService {
     CarDto save(CreateCarRequestDto requestDto);
 
-    List<CarDtoWithShortInfo> findAll(Pageable pageable);
+    List<CarWithShortInfoDto> findAll(Pageable pageable);
 
     CarDto findById(Long id);
 

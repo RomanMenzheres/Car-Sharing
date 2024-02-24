@@ -1,7 +1,7 @@
 package com.example.carsharing.service.impl;
 
 import com.example.carsharing.dto.CarDto;
-import com.example.carsharing.dto.CarDtoWithShortInfo;
+import com.example.carsharing.dto.CarWithShortInfoDto;
 import com.example.carsharing.dto.CreateCarRequestDto;
 import com.example.carsharing.exception.EntityNotFoundException;
 import com.example.carsharing.mapper.CarMapper;
@@ -26,16 +26,17 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarDtoWithShortInfo> findAll(Pageable pageable) {
+    public List<CarWithShortInfoDto> findAll(Pageable pageable) {
         return carRepository.findAll(pageable).stream()
-                .map(carMapper::toDtoWithShortInfo)
+                .map(carMapper::toWithShortInfoDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CarDto findById(Long id) {
         return carMapper.toDto(
-                carRepository.findById(id)
+                carRepository
+                        .findById(id)
                         .orElseThrow(
                                 () -> new EntityNotFoundException("Can't find car with id: " + id)
                         )

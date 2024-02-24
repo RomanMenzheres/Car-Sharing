@@ -1,7 +1,7 @@
 package com.example.carsharing.controller;
 
 import com.example.carsharing.dto.CarDto;
-import com.example.carsharing.dto.CarDtoWithShortInfo;
+import com.example.carsharing.dto.CarWithShortInfoDto;
 import com.example.carsharing.dto.CreateCarRequestDto;
 import com.example.carsharing.service.CarService;
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class CarController {
     }
 
     @GetMapping
-    public List<CarDtoWithShortInfo> getAll(Pageable pageable) {
+    public List<CarWithShortInfoDto> getAll(Pageable pageable) {
         return carService.findAll(pageable);
     }
 

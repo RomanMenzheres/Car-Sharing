@@ -1,6 +1,6 @@
 package com.example.carsharing.dto;
 
-public record CarDtoWithShortInfo(
+public record CarWithShortInfoDto(
         Long id,
         String brand,
         String model,
