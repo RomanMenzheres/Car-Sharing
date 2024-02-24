@@ -2,6 +2,7 @@ package com.example.carsharing.dto;
 
 import com.example.carsharing.model.Car;
 import com.example.carsharing.validation.ValueOfEnum;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
@@ -20,6 +21,6 @@ public class CreateCarRequestDto {
     private String type;
     @Min(0)
     private int inventory;
-    @Min(0)
+    @DecimalMin("0")
     private BigDecimal dailyFee;
 }
