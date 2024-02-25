@@ -25,7 +25,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: type
-                  type: enum('SEDAN', 'SUV', 'HATCHBACK', 'UNIVERSAL')
+                  type: enum('SEDAN', 'SUV', 'HATCHBACK', 'STATION_WAGON')
                   constraints:
                     nullable: false
               - column:
