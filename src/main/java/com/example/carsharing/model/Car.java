@@ -28,7 +28,7 @@ public class Car {
     private String brand;
     @Column(nullable = false)
     private String model;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CarType type;
     @Column(nullable = false)

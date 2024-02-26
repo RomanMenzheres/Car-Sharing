@@ -1,14 +1,15 @@
 package com.example.carsharing.controller;
 
-import com.example.carsharing.dto.CarDto;
-import com.example.carsharing.dto.CarWithShortInfoDto;
-import com.example.carsharing.dto.CreateCarRequestDto;
+import com.example.carsharing.dto.car.CarDto;
+import com.example.carsharing.dto.car.CarWithShortInfoDto;
+import com.example.carsharing.dto.car.CreateCarRequestDto;
 import com.example.carsharing.service.CarService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,7 @@ public class CarController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MANAGER')")
     public CarDto create(@RequestBody @Valid CreateCarRequestDto requestDto) {
         return carService.save(requestDto);
     }
@@ -42,6 +44,7 @@ public class CarController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public CarDto update(@PathVariable("id") Long id,
                          @RequestBody @Valid CreateCarRequestDto requestDto) {
         return carService.update(id, requestDto);
@@ -49,6 +52,7 @@ public class CarController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MANAGER')")
     public void delete(@PathVariable("id") Long id) {
         carService.delete(id);
     }
