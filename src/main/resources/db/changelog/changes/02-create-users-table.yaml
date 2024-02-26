@@ -39,4 +39,3 @@ databaseChangeLog:
                   type: enum('CUSTOMER', 'MANAGER')
                   constraints:
                     nullable: false
-

@@ -23,24 +23,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto save(UserRegistrationRequestDto requestDto) {
-        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(requestDto.email()).isPresent()) {
             throw new RegistrationException("Provided email is already taken");
         }
-        requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         User user = userMapper.toModel(requestDto);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(User.Role.CUSTOMER);
         return userMapper.toDto(userRepository.save(user));
     }
 
     @Override
     public UserDto findById(Long id) {
-        return userMapper.toDto(
-                userRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Can't find user with id: " + id)
-                        )
-        );
+        return userMapper.toDto(userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find user with id: " + id)));
     }
 
     @Override
@@ -51,11 +46,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserWithRoleDto updateRole(Long id, User.Role role) {
-        User user = userRepository
-                .findById(id)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Can't find user with id: " + id)
-                );
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find user with id: " + id));
         user.setRole(role);
         return userMapper.toWithRoleDto(userRepository.save(user));
     }

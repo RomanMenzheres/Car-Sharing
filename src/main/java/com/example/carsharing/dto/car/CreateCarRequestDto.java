@@ -6,21 +6,19 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
-import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-@Data
-public class CreateCarRequestDto {
-    @NotEmpty
-    @Length(max = 255)
-    private String brand;
-    @NotEmpty
-    @Length(max = 255)
-    private String model;
-    @ValueOfEnum(enumClass = Car.CarType.class)
-    private String type;
-    @Min(0)
-    private int inventory;
-    @DecimalMin("0")
-    private BigDecimal dailyFee;
-}
+public record CreateCarRequestDto(
+        @NotEmpty
+        @Length(max = 255)
+        String brand,
+        @NotEmpty
+        @Length(max = 255)
+        String model,
+        @ValueOfEnum(enumClass = Car.CarType.class)
+        String type,
+        @Min(0)
+        int inventory,
+        @DecimalMin("0")
+        BigDecimal dailyFee
+) {}
