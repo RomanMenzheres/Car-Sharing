@@ -10,12 +10,12 @@ import com.example.carsharing.mapper.UserMapper;
 import com.example.carsharing.model.User;
 import com.example.carsharing.repository.UserRepository;
 import com.example.carsharing.service.UserService;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;

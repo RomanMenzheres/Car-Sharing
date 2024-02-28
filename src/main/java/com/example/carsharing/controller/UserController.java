@@ -6,7 +6,7 @@ import com.example.carsharing.dto.user.UserWithRoleDto;
 import com.example.carsharing.model.User;
 import com.example.carsharing.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserController {
     private final UserService userService;
 

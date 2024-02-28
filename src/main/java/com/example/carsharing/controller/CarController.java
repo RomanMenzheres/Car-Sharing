@@ -6,7 +6,7 @@ import com.example.carsharing.dto.car.CreateCarRequestDto;
 import com.example.carsharing.service.CarService;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/cars")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CarController {
     private final CarService carService;
 

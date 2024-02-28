@@ -7,7 +7,7 @@ import com.example.carsharing.dto.user.UserRegistrationRequestDto;
 import com.example.carsharing.security.AuthenticationService;
 import com.example.carsharing.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;

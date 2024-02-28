@@ -16,4 +16,8 @@ public interface CarService {
     CarDto update(Long id, CreateCarRequestDto requestDto);
 
     void delete(Long id);
+
+    void rentalCar(Long id);
+
+    void returnRentalCar(Long id);
 }
