@@ -36,9 +36,15 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public List<RentalDto> findAllBy(Long userId, boolean isActive, Pageable pageable) {
-        return rentalRepository.findAll(pageable).stream()
-                .filter(rental -> (rental.getActualReturnDateTime() == null) == isActive)
-                .map(rentalMapper::toDto)
+        if (userId == null) {
+            return rentalRepository.findAll(pageable).stream()
+                    .filter(rental -> (rental.getActualReturnDateTime() == null) == isActive)
+                    .map(rentalMapper::toDto)
+                    .toList();
+        }
+
+        return findAllByUser(new User(userId), pageable).stream()
+                .filter(rentalDto -> (rentalDto.actualReturnDateTime() == null) == isActive)
                 .toList();
     }
 

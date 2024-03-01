@@ -41,7 +41,7 @@ public class RentalController {
     @GetMapping()
     @PreAuthorize("hasAuthority('MANAGER')")
     public List<RentalDto> getAllByUserAndActivity(
-            @RequestParam(name = "user_id") Long userId,
+            @RequestParam(name = "user_id", required = false) Long userId,
             @RequestParam(name = "is_active", defaultValue = "true") boolean isActive,
             Pageable pageable
     ) {
@@ -49,6 +49,7 @@ public class RentalController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public RentalWithDetailedCarInfoDto getById(@PathVariable("id") Long id) {
         return rentalService.findById(id);
     }

@@ -3,6 +3,7 @@ package com.example.carsharing.exception;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -39,7 +40,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                     RegistrationException.class,
                     EntityNotFoundException.class,
                     RentalIsNotActiveException.class,
-                    NoAvailableCarsException.class
+                    NoAvailableCarsException.class,
+                    JwtException.class
             }
     )
     public ResponseEntity<Object> handleException(
@@ -72,6 +74,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             status = HttpStatus.CONFLICT;
         } else if (exception instanceof EntityNotFoundException) {
             status = HttpStatus.NOT_FOUND;
+        } else if (exception instanceof JwtException) {
+            status = HttpStatus.UNAUTHORIZED;
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
