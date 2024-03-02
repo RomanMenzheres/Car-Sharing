@@ -3,6 +3,7 @@ package com.example.carsharing.service;
 import com.example.carsharing.dto.car.CarDto;
 import com.example.carsharing.dto.car.CarWithShortInfoDto;
 import com.example.carsharing.dto.car.CreateCarRequestDto;
+import com.example.carsharing.model.Car;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +18,7 @@ public interface CarService {
 
     void delete(Long id);
 
-    void rentalCar(Long id);
+    void rentalCar(Car car);
 
-    void returnRentalCar(Long id);
+    void returnRentalCar(Car car);
 }

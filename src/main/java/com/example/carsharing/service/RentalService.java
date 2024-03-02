@@ -17,4 +17,6 @@ public interface RentalService {
     RentalWithDetailedCarInfoDto findById(Long id);
 
     List<RentalDto> findAllByUser(User user, Pageable pageable);
+
+    void checkOverdueRentals();
 }

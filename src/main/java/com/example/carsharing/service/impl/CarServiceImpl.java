@@ -53,12 +53,9 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void rentalCar(Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find car with id: " + id));
-
+    public void rentalCar(Car car) {
         if (car.getInventory() <= 0) {
-            throw new NoAvailableCarsException("There no available cars with id " + id
+            throw new NoAvailableCarsException("There no available cars with id " + car.getId()
                     + " at the moment");
         }
 
@@ -66,9 +63,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void returnRentalCar(Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find car with id: " + id));
+    public void returnRentalCar(Car car) {
         car.setInventory(car.getInventory() + 1);
     }
 }
