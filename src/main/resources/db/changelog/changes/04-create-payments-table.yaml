@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: create-rentals-table
+      id: create-payments-table
       author: Roma Menzheres
       changes:
         - createTable:
-            tableName: rentals
+            tableName: payments
             columns:
               - column:
                   name: id
@@ -14,26 +14,33 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: rental_date
-                  type: date
-                  constraints:
-                    nullable: false
-              - column:
-                  name: return_date
-                  type: date
-                  constraints:
-                    nullable: false
-              - column:
-                  name: actual_return_date
-                  type: date
-              - column:
-                  name: car_id
+                  name: rental_id
                   type: bigint
                   constraints:
                     nullable: false
               - column:
-                  name: user_id
-                  type: bigint
+                  name: status
+                  type: enum('PENDING', 'PAID')
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: enum('PAYMENT', 'FINE')
+                  constraints:
+                    nullable: false
+              - column:
+                  name: session_url
+                  type: varchar(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: session_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount_to_pay
+                  type: DECIMAL(11,2)
                   constraints:
                     nullable: false
               - column:
@@ -44,17 +51,9 @@ databaseChangeLog:
                     nullable: false
 
               - addForeignKeyConstraint:
-                  baseTableName: rentals
-                  baseColumnNames: car_id
-                  referencedTableName: cars
+                  baseTableName: payments
+                  baseColumnNames: rental_id
+                  referencedTableName: rentals
                   referencedColumnNames: id
-                  constraintName: fk_rentals_cars
-                  onDelete: CASCADE
-
-              - addForeignKeyConstraint:
-                  baseTableName: rentals
-                  baseColumnNames: user_id
-                  referencedTableName: users
-                  referencedColumnNames: id
-                  constraintName: fk_rentals_users
+                  constraintName: fk_payments_rentals
                   onDelete: CASCADE

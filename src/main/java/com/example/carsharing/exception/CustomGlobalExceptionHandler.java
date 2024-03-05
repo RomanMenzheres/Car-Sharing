@@ -41,7 +41,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                     EntityNotFoundException.class,
                     RentalIsNotActiveException.class,
                     NoAvailableCarsException.class,
-                    JwtException.class
+                    JwtException.class,
+                    RentalIsAlreadyPaid.class
             }
     )
     public ResponseEntity<Object> handleException(

@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users
+      author: Roma Menzheres
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: {name: email, value: "john.doe@example.com"}
+              - column: {name: password, value: "$2a$10$U08pa.kybIugBsCwRjhooOEyT3iOcw2sugrwtcw0T7MoUgW/nPGna"}
+              - column: {name: first_name, value: "John"}
+              - column: {name: last_name, value: "Doe"}
+              - column: {name: role, value: "CUSTOMER"}
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: "alice.doe@example.com" }
+              - column: { name: password, value: "$2a$10$U08pa.kybIugBsCwRjhooOEyT3iOcw2sugrwtcw0T7MoUgW/nPGna" }
+              - column: { name: first_name, value: "Alice" }
+              - column: { name: last_name, value: "Doe" }
+              - column: { name: role, value: "MANAGER" }

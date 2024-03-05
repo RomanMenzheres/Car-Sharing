@@ -14,8 +14,9 @@ import com.example.carsharing.repository.RentalRepository;
 import com.example.carsharing.service.CarService;
 import com.example.carsharing.service.NotificationService;
 import com.example.carsharing.service.RentalService;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class RentalServiceImpl implements RentalService {
+    private static final BigDecimal FINE_MULTIPLIER = BigDecimal.valueOf(1.5);
     private final RentalRepository rentalRepository;
     private final RentalMapper rentalMapper;
     private final CarService carService;
@@ -40,7 +42,7 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = rentalMapper.toModel(requestDto);
         rental.setUser(user);
         rental.setCar(car);
-        rental.setRentalDateTime(LocalDateTime.now());
+        rental.setRentalDate(LocalDate.now());
         RentalWithDetailedCarInfoDto rentalDto =
                 rentalMapper.toWithDetailedCarInfoDto(rentalRepository.save(rental));
         notificationService.onRentalCreationNotification(rentalDto);
@@ -51,13 +53,13 @@ public class RentalServiceImpl implements RentalService {
     public List<RentalDto> findAllBy(Long userId, boolean isActive, Pageable pageable) {
         if (userId == null) {
             return rentalRepository.findAll(pageable).stream()
-                    .filter(rental -> (rental.getActualReturnDateTime() == null) == isActive)
+                    .filter(rental -> (rental.getActualReturnDate() == null) == isActive)
                     .map(rentalMapper::toDto)
                     .toList();
         }
 
         return findAllByUser(new User(userId), pageable).stream()
-                .filter(rentalDto -> (rentalDto.actualReturnDateTime() == null) == isActive)
+                .filter(rentalDto -> (rentalDto.actualReturnDate() == null) == isActive)
                 .toList();
     }
 
@@ -66,11 +68,11 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find rental with id: " + id));
 
-        if (rental.getActualReturnDateTime() != null) {
+        if (rental.getActualReturnDate() != null) {
             throw new RentalIsNotActiveException("This rental is already not active");
         }
         carService.returnRentalCar(rental.getCar());
-        rental.setActualReturnDateTime(LocalDateTime.now());
+        rental.setActualReturnDate(LocalDate.now());
         return rentalMapper.toWithDetailedCarInfoDto(rentalRepository.save(rental));
     }
 
@@ -92,11 +94,43 @@ public class RentalServiceImpl implements RentalService {
     public void checkOverdueRentals() {
         LocalDate deadline = LocalDate.now().plusDays(1);
         List<RentalDto> overdueRentals = rentalRepository.findAll().stream()
-                .filter(rental -> rental.getActualReturnDateTime() == null)
-                .filter(rental -> deadline.isAfter(rental.getReturnDateTime().toLocalDate())
-                        || deadline.isEqual(rental.getReturnDateTime().toLocalDate()))
+                .filter(rental -> rental.getActualReturnDate() == null)
+                .filter(rental -> deadline.isAfter(rental.getReturnDate())
+                        || deadline.isEqual(rental.getReturnDate()))
                 .map(rentalMapper::toDto)
                 .toList();
         notificationService.scheduledOverdueRentalNotification(overdueRentals);
+    }
+
+    @Override
+    public BigDecimal getAmountToPay(Rental rental) {
+        BigDecimal dailyFee = rental.getCar().getDailyFee();
+        LocalDate rentalDate = rental.getRentalDate();
+        LocalDate returnDate = rental.getReturnDate();
+        LocalDate actualReturnDate = rental.getActualReturnDate();
+
+        if (actualReturnDate != null) {
+            return dailyFee.multiply(BigDecimal.valueOf(
+                    ChronoUnit.DAYS.between(rentalDate, actualReturnDate))
+            );
+        }
+
+        BigDecimal rentalDays = BigDecimal.valueOf(
+                ChronoUnit.DAYS.between(rentalDate, returnDate)
+        );
+
+        if (returnDate.isBefore(LocalDate.now())) {
+            BigDecimal penaltyDays = BigDecimal.valueOf(
+                    ChronoUnit.DAYS.between(returnDate, LocalDate.now())
+            );
+
+            return dailyFee
+                    .multiply(rentalDays)
+                    .add(dailyFee
+                            .multiply(FINE_MULTIPLIER)
+                            .multiply(penaltyDays));
+        }
+
+        return dailyFee.multiply(rentalDays);
     }
 }
