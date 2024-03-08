@@ -30,12 +30,13 @@ public class RentalController {
             @Valid @RequestBody CreateRentalRequestDto requestDto,
             Authentication authentication
     ) {
-        return rentalService.create(requestDto, (User) authentication.getPrincipal());
+        return rentalService.save(requestDto, (User) authentication.getPrincipal());
     }
 
     @GetMapping("/my")
     public List<RentalDto> getAllByUser(Authentication authentication, Pageable pageable) {
-        return rentalService.findAllByUser((User) authentication.getPrincipal(), pageable);
+        return rentalService.findAllByUser(
+                ((User) authentication.getPrincipal()).getId(), pageable);
     }
 
     @GetMapping()
@@ -45,7 +46,7 @@ public class RentalController {
             @RequestParam(name = "is_active", defaultValue = "true") boolean isActive,
             Pageable pageable
     ) {
-        return rentalService.findAllBy(userId, isActive, pageable);
+        return rentalService.findAllByUserAndActivity(userId, isActive, pageable);
     }
 
     @GetMapping("/{id}")

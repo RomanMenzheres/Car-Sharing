@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface PaymentService {
 
-    List<PaymentDto> findByUser(Long userId);
+    PaymentDto save(CreatePaymentRequestDto requestDto);
 
-    PaymentDto create(CreatePaymentRequestDto requestDto);
+    List<PaymentDto> findByUser(Long userId);
 
     PaymentDto successful(String sessionId);
 

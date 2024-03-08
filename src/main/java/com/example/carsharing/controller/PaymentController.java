@@ -26,7 +26,7 @@ public class PaymentController {
 
     @PostMapping
     public PaymentDto create(@Valid @RequestBody CreatePaymentRequestDto requestDto) {
-        return paymentService.create(requestDto);
+        return paymentService.save(requestDto);
     }
 
     @GetMapping("/success")

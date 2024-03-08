@@ -2,13 +2,13 @@ package com.example.carsharing.service.impl;
 
 import com.example.carsharing.dto.payment.CreatePaymentRequestDto;
 import com.example.carsharing.dto.payment.PaymentDto;
+import com.example.carsharing.dto.rental.RentalWithDetailedCarInfoDto;
 import com.example.carsharing.exception.EntityNotFoundException;
+import com.example.carsharing.exception.PaymentException;
 import com.example.carsharing.exception.RentalIsAlreadyPaid;
 import com.example.carsharing.mapper.PaymentMapper;
 import com.example.carsharing.model.Payment;
-import com.example.carsharing.model.Rental;
 import com.example.carsharing.repository.PaymentRepository;
-import com.example.carsharing.repository.RentalRepository;
 import com.example.carsharing.service.NotificationService;
 import com.example.carsharing.service.PaymentService;
 import com.example.carsharing.service.RentalService;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 public class StripePaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
-    private final RentalRepository rentalRepository;
     private final RentalService rentalService;
     private final StripeUtil stripeUtil;
     private final NotificationService notificationService;
@@ -40,35 +39,27 @@ public class StripePaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDto create(CreatePaymentRequestDto requestDto) {
+    public PaymentDto save(CreatePaymentRequestDto requestDto) {
         Long rentalId = requestDto.rentalId();
-        Rental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Can't find rental with id " + rentalId)
-                );
+        RentalWithDetailedCarInfoDto rental = rentalService.findById(rentalId);
         if (paymentRepository.findByRentalId(rentalId).isPresent()) {
             throw new RentalIsAlreadyPaid("Rental is already paid!");
         }
-
         Payment payment = paymentMapper.toModel(requestDto);
-        payment.setRental(rental);
         payment.setStatus(Payment.PaymentStatus.PENDING);
-        payment.setAmountToPay(rentalService.getAmountToPay(rental));
+        payment.setAmountToPay(rentalService.getAmountToPay(rentalId));
         try {
             Session session = stripeUtil.createStripeSession(
                     payment.getAmountToPay(), "Rental Payment"
             );
             payment.setSessionId(session.getId());
             payment.setSessionUrl(new URL(session.getUrl()));
+            PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
+            notificationService.onPaymentCreationNotification(paymentDto, rental.userId());
+            return paymentDto;
         } catch (StripeException | MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw new PaymentException("Can't create payment session", e);
         }
-
-        PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
-
-        notificationService.onPaymentCreationNotification(paymentDto);
-
-        return paymentDto;
     }
 
     @Override
@@ -76,7 +67,7 @@ public class StripePaymentServiceImpl implements PaymentService {
         Payment payment = findBySessionId(sessionId);
         payment.setStatus(Payment.PaymentStatus.PAID);
         PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
-        notificationService.onSuccessfulPayment(paymentDto);
+        notificationService.onSuccessfulPayment(paymentDto, payment.getRental().getUser().getId());
         return paymentDto;
     }
 

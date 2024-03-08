@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-users-table
+      author: Roma Menzheres
+      changes:
+        - createTable:
+            tableName: telegram_users_info
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: chat_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+              - addForeignKeyConstraint:
+                  baseTableName: telegram_users_info
+                  baseColumnNames: user_id
+                  referencedTableName: users
+                  referencedColumnNames: id
+                  constraintName: fk_telegram_users_info_users
+                  onDelete: CASCADE

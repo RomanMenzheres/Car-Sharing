@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,7 +36,7 @@ public class RentalServiceImpl implements RentalService {
     private final NotificationService notificationService;
 
     @Override
-    public RentalWithDetailedCarInfoDto create(CreateRentalRequestDto requestDto, User user) {
+    public RentalWithDetailedCarInfoDto save(CreateRentalRequestDto requestDto, User user) {
         long carId = requestDto.carId();
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find car with id: " + carId));
@@ -50,7 +52,9 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public List<RentalDto> findAllBy(Long userId, boolean isActive, Pageable pageable) {
+    public List<RentalDto> findAllByUserAndActivity(
+            Long userId, boolean isActive, Pageable pageable
+    ) {
         if (userId == null) {
             return rentalRepository.findAll(pageable).stream()
                     .filter(rental -> (rental.getActualReturnDate() == null) == isActive)
@@ -58,7 +62,7 @@ public class RentalServiceImpl implements RentalService {
                     .toList();
         }
 
-        return findAllByUser(new User(userId), pageable).stream()
+        return findAllByUser(userId, pageable).stream()
                 .filter(rentalDto -> (rentalDto.actualReturnDate() == null) == isActive)
                 .toList();
     }
@@ -83,8 +87,8 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public List<RentalDto> findAllByUser(User user, Pageable pageable) {
-        return rentalRepository.findAllByUser(user, pageable).stream()
+    public List<RentalDto> findAllByUser(Long userId, Pageable pageable) {
+        return rentalRepository.findAllByUserId(userId, pageable).stream()
                 .map(rentalMapper::toDto)
                 .toList();
     }
@@ -93,21 +97,22 @@ public class RentalServiceImpl implements RentalService {
     @Scheduled(cron = "0 0 8 * * *")
     public void checkOverdueRentals() {
         LocalDate deadline = LocalDate.now().plusDays(1);
-        List<RentalDto> overdueRentals = rentalRepository.findAll().stream()
+        Map<Long, List<RentalDto>> overdueRentals = rentalRepository.findAll().stream()
                 .filter(rental -> rental.getActualReturnDate() == null)
                 .filter(rental -> deadline.isAfter(rental.getReturnDate())
                         || deadline.isEqual(rental.getReturnDate()))
                 .map(rentalMapper::toDto)
-                .toList();
+                .collect(Collectors.groupingBy(RentalDto::userId));
         notificationService.scheduledOverdueRentalNotification(overdueRentals);
     }
 
     @Override
-    public BigDecimal getAmountToPay(Rental rental) {
-        BigDecimal dailyFee = rental.getCar().getDailyFee();
-        LocalDate rentalDate = rental.getRentalDate();
-        LocalDate returnDate = rental.getReturnDate();
-        LocalDate actualReturnDate = rental.getActualReturnDate();
+    public BigDecimal getAmountToPay(Long rentalId) {
+        RentalWithDetailedCarInfoDto rental = findById(rentalId);
+        BigDecimal dailyFee = rental.car().dailyFee();
+        LocalDate rentalDate = rental.rentalDate();
+        LocalDate returnDate = rental.returnDate();
+        LocalDate actualReturnDate = rental.actualReturnDate();
 
         if (actualReturnDate != null) {
             return dailyFee.multiply(BigDecimal.valueOf(

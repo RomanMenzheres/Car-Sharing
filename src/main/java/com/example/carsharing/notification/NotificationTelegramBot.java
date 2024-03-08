@@ -1,6 +1,8 @@
 package com.example.carsharing.notification;
 
 import com.example.carsharing.exception.TelegramBotMessageException;
+import com.example.carsharing.repository.TelegramUserInfoRepository;
+import com.example.carsharing.service.TelegramUserInfoService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -12,11 +14,15 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class NotificationTelegramBot extends TelegramLongPollingBot {
     @Value("${bot.name}")
     private String botName;
-    @Value("${bot.chatId}")
-    private String chatId;
+    private final TelegramUserInfoService telegramUserInfoService;
+    private final TelegramUserInfoRepository telegramUserInfoRepository;
 
-    public NotificationTelegramBot(@Value("${bot.key}") String botKey) {
+    public NotificationTelegramBot(@Value("${bot.key}") String botKey,
+                                   TelegramUserInfoService telegramUserInfoService,
+                                   TelegramUserInfoRepository telegramUserInfoRepository) {
         super(botKey);
+        this.telegramUserInfoService = telegramUserInfoService;
+        this.telegramUserInfoRepository = telegramUserInfoRepository;
     }
 
     @Override
@@ -26,25 +32,44 @@ public class NotificationTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        chatId = String.valueOf(update.getMessage().getChatId());
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        String chatId = String.valueOf(update.getMessage().getChatId());
+        if (telegramUserInfoRepository.findByChatId(chatId).isEmpty()
+                && update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             if (message.equals("/start")) {
-                startingMessage();
+                startingMessage(chatId);
+            } else {
+                validateUser(message, chatId);
             }
         }
     }
 
-    private void startingMessage() {
-        String message =
-                "This bot will send you notifications on:"
-                + "\n- Created rentals"
-                + "\n- Successful payments"
-                + "\n-Overdue rentals";
-        sendMessage(message);
+    private void startingMessage(String chatId) {
+        String message = """
+                This bot will send you notifications on:
+                - Rentals creation
+                - Payments creation
+                - Successful payments
+                - Overdue rentals
+
+                Please, enter your email to authorize""";
+        sendMessage(message, chatId);
     }
 
-    public void sendMessage(String value) {
+    private void validateUser(String email, String chatId) {
+        try {
+            telegramUserInfoService.save(email, chatId);
+            sendMessage("Authorized successfully!", chatId);
+        } catch (Exception e) {
+            sendMessage("Email is invalid! Please, try again.", chatId);
+        }
+    }
+
+    public void sendMessage(String value, String chatId) {
+        if (chatId == null) {
+            return;
+        }
+
         SendMessage message = new SendMessage(chatId, value);
         try {
             execute(message);
