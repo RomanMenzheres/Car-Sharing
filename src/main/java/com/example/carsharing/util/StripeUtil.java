@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StripeUtil {
     private static final String DEFAULT_CURRENCY = "usd";
-    @Value("${STRIPE_SUCCESS_LINK}")
+    @Value("${stripe.success.link}")
     private String successUrl;
-    @Value("${STRIPE_CANCEL_LINK}")
+    @Value("${stripe.cancel.link}")
     private String cancelUrl;
 
-    public StripeUtil(@Value("${STRIPE_API_KEY}") String apiKey) {
+    public StripeUtil(@Value("${stripe.api.key}") String apiKey) {
         Stripe.apiKey = apiKey;
     }
 
