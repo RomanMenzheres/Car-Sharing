@@ -36,7 +36,8 @@ public class UserController {
     @Operation(summary = "Change User's Role", description = "Change user's role")
     @PutMapping("/{id}/role")
     @PreAuthorize("hasAuthority('MANAGER')")
-    public UserWithRoleDto updateRole(@PathVariable("id") Long id, @RequestParam User.Role role) {
+    public UserWithRoleDto updateRole(@PathVariable("id") Long id,
+                                      @RequestParam(name = "role") User.Role role) {
         return userService.updateRole(id, role);
     }
 

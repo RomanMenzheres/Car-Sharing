@@ -18,6 +18,7 @@ import com.stripe.model.checkout.Session;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,24 +43,17 @@ public class StripePaymentServiceImpl implements PaymentService {
     public PaymentDto save(CreatePaymentRequestDto requestDto) {
         Long rentalId = requestDto.rentalId();
         RentalWithDetailedCarInfoDto rental = rentalService.findById(rentalId);
-        if (paymentRepository.findByRentalId(rentalId).isPresent()) {
-            throw new RentalIsAlreadyPaid("Rental is already paid!");
+        Optional<Payment> byRentalId = paymentRepository.findByRentalId(rentalId);
+        if (byRentalId.isPresent()) {
+            Payment payment = byRentalId.get();
+            if (payment.getStatus().name().equals("PAID")) {
+                throw new RentalIsAlreadyPaid("Rental is already paid!");
+            } else {
+                return paymentMapper.toDto(payment);
+            }
         }
-        Payment payment = paymentMapper.toModel(requestDto);
-        payment.setStatus(Payment.PaymentStatus.PENDING);
-        payment.setAmountToPay(rentalService.getAmountToPay(rentalId));
-        try {
-            Session session = stripeUtil.createStripeSession(
-                    payment.getAmountToPay(), "Rental Payment"
-            );
-            payment.setSessionId(session.getId());
-            payment.setSessionUrl(new URL(session.getUrl()));
-            PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
-            notificationService.onPaymentCreationNotification(paymentDto, rental.userId());
-            return paymentDto;
-        } catch (StripeException | MalformedURLException e) {
-            throw new PaymentException("Can't create payment session", e);
-        }
+
+        return createPayment(requestDto, rental);
     }
 
     @Override
@@ -82,5 +76,24 @@ public class StripePaymentServiceImpl implements PaymentService {
         return paymentRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Can't find payment by session id: " + sessionId));
+    }
+
+    private PaymentDto createPayment(CreatePaymentRequestDto requestDto,
+                                     RentalWithDetailedCarInfoDto rental) {
+        Payment payment = paymentMapper.toModel(requestDto);
+        payment.setStatus(Payment.PaymentStatus.PENDING);
+        payment.setAmountToPay(rentalService.getAmountToPay(rental.id()));
+        try {
+            Session session = stripeUtil.createStripeSession(
+                    payment.getAmountToPay(), "Rental Payment"
+            );
+            payment.setSessionId(session.getId());
+            payment.setSessionUrl(new URL(session.getUrl()));
+            PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
+            notificationService.onPaymentCreationNotification(paymentDto, rental.userId());
+            return paymentDto;
+        } catch (StripeException | MalformedURLException e) {
+            throw new PaymentException("Can't create payment session", e);
+        }
     }
 }

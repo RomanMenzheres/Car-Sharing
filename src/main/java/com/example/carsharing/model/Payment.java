@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
@@ -34,7 +33,6 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentType type;
     @OneToOne
-    @MapsId
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Rental rental;
     @Column(name = "session_url", nullable = false)
