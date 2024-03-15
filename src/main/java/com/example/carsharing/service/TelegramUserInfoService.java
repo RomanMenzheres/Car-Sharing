@@ -8,5 +8,4 @@ public interface TelegramUserInfoService {
     TelegramUserInfo findByChatId(String chatId);
 
     TelegramUserInfo findByUserId(Long userId);
-
 }

@@ -46,11 +46,10 @@ public class StripePaymentServiceImpl implements PaymentService {
         Optional<Payment> byRentalId = paymentRepository.findByRentalId(rentalId);
         if (byRentalId.isPresent()) {
             Payment payment = byRentalId.get();
-            if (payment.getStatus().name().equals("PAID")) {
+            if (payment.getStatus().name().equals(Payment.PaymentStatus.PAID.name())) {
                 throw new RentalIsAlreadyPaid("Rental is already paid!");
-            } else {
-                return paymentMapper.toDto(payment);
             }
+            return paymentMapper.toDto(payment);
         }
 
         return createPayment(requestDto, rental);
