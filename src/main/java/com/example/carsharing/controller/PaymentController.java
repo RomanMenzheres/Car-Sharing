@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,19 +33,20 @@ public class PaymentController {
 
     @Operation(summary = "Get User's Payments", description = "Get all payments by user id")
     @GetMapping
-    public List<PaymentDto> getByUserId(@RequestParam Long userId) {
+    @PreAuthorize("hasAuthority('MANAGER')")
+    public List<PaymentDto> getByUserId(@RequestParam("user_id") Long userId) {
         return paymentService.findByUser(userId);
     }
 
     @Operation(summary = "Payment Successful", description = "Success endpoint for payment")
     @GetMapping("/success")
-    public PaymentDto checkSuccessfulPayments(@RequestParam("session_id") String sessionId) {
-        return paymentService.successful(sessionId);
+    public PaymentDto successPayment(@RequestParam("session_id") String sessionId) {
+        return paymentService.success(sessionId);
     }
 
     @Operation(summary = "Payment Canceled", description = "Cancel endpoint for payment")
     @GetMapping("/cancel")
-    public PaymentDto canceledPayment(@RequestParam("session_id") String sessionId) {
-        return paymentService.canceled(sessionId);
+    public PaymentDto cancelPayment(@RequestParam("session_id") String sessionId) {
+        return paymentService.cancel(sessionId);
     }
 }

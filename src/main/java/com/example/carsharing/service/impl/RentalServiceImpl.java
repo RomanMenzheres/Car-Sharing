@@ -83,7 +83,8 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public RentalWithDetailedCarInfoDto findById(Long id) {
         return rentalMapper.toWithDetailedCarInfoDto(rentalRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find rental with id " + id)));
+                .orElseThrow(() -> new EntityNotFoundException("Can't find rental"
+                        + " with id: " + id)));
     }
 
     @Override

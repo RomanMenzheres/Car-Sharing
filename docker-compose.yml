@@ -43,5 +43,5 @@ services:
       BOT_KEY: "$BOT_KEY"
       BOT_NAME: "$BOT_NAME"
       JWT_SECRET: "$JWT_SECRET"
-      STRIPE_KEY: "$STRIPE_KEY"
+      STRIPE_API_KEY: "$STRIPE_API_KEY"
 

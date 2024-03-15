@@ -10,7 +10,7 @@ public interface PaymentService {
 
     List<PaymentDto> findByUser(Long userId);
 
-    PaymentDto successful(String sessionId);
+    PaymentDto success(String sessionId);
 
-    PaymentDto canceled(String sessionId);
+    PaymentDto cancel(String sessionId);
 }

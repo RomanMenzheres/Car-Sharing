@@ -55,7 +55,7 @@ public class CarServiceImpl implements CarService {
     @Override
     public void rentalCar(Car car) {
         if (car.getInventory() <= 0) {
-            throw new NoAvailableCarsException("There no available cars with id " + car.getId()
+            throw new NoAvailableCarsException("There no available cars with id: " + car.getId()
                     + " at the moment");
         }
 

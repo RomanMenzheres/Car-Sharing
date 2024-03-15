@@ -57,7 +57,7 @@ public class StripePaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDto successful(String sessionId) {
+    public PaymentDto success(String sessionId) {
         Payment payment = findBySessionId(sessionId);
         payment.setStatus(Payment.PaymentStatus.PAID);
         PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
@@ -66,7 +66,7 @@ public class StripePaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDto canceled(String sessionId) {
+    public PaymentDto cancel(String sessionId) {
         Payment payment = findBySessionId(sessionId);
         payment.setStatus(Payment.PaymentStatus.CANCELED);
         return paymentMapper.toDto(paymentRepository.save(payment));

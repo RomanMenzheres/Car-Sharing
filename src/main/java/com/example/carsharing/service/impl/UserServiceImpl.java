@@ -23,9 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto save(UserRegistrationRequestDto requestDto) {
-        if (userRepository.findByEmail(requestDto.email()).isPresent()) {
-            throw new RegistrationException("Provided email is already taken");
-        }
+        checkIfEmailFree(requestDto.email());
         User user = userMapper.toModel(requestDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(User.Role.CUSTOMER);
@@ -40,6 +38,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(User user, UserUpdateRequestDto requestDto) {
+        if (!user.getEmail().equals(requestDto.email())) {
+            checkIfEmailFree(requestDto.email());
+        }
         userMapper.updateUserFromDto(requestDto, user);
         return userMapper.toDto(userRepository.save(user));
     }
@@ -50,5 +51,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Can't find user with id: " + id));
         user.setRole(role);
         return userMapper.toWithRoleDto(userRepository.save(user));
+    }
+
+    private void checkIfEmailFree(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RegistrationException("Provided email is already taken");
+        }
     }
 }
