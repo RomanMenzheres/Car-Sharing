@@ -55,15 +55,15 @@ public class RentalServiceImpl implements RentalService {
     public List<RentalDto> findAllByUserAndActivity(
             Long userId, boolean isActive, Pageable pageable
     ) {
-        if (userId == null) {
-            return rentalRepository.findAll(pageable).stream()
-                    .filter(rental -> (rental.getActualReturnDate() == null) == isActive)
-                    .map(rentalMapper::toDto)
-                    .toList();
-        }
+        return rentalRepository.findAllByUserAndActivity(userId, isActive, pageable).stream()
+                .map(rentalMapper::toDto)
+                .toList();
+    }
 
-        return findAllByUser(userId, pageable).stream()
-                .filter(rentalDto -> (rentalDto.actualReturnDate() == null) == isActive)
+    @Override
+    public List<RentalDto> findAllByActivity(boolean isActive, Pageable pageable) {
+        return rentalRepository.findAllByActivity(isActive, pageable).stream()
+                .map(rentalMapper::toDto)
                 .toList();
     }
 
@@ -98,12 +98,10 @@ public class RentalServiceImpl implements RentalService {
     @Scheduled(cron = "0 0 8 * * *")
     public void checkOverdueRentals() {
         LocalDate deadline = LocalDate.now().plusDays(1);
-        Map<Long, List<RentalDto>> overdueRentals = rentalRepository.findAll().stream()
-                .filter(rental -> rental.getActualReturnDate() == null)
-                .filter(rental -> deadline.isAfter(rental.getReturnDate())
-                        || deadline.isEqual(rental.getReturnDate()))
-                .map(rentalMapper::toDto)
-                .collect(Collectors.groupingBy(RentalDto::userId));
+        Map<Long, List<RentalDto>> overdueRentals =
+                rentalRepository.findAllOverdue(deadline).stream()
+                        .map(rentalMapper::toDto)
+                        .collect(Collectors.groupingBy(RentalDto::userId));
         notificationService.scheduledOverdueRentalNotification(overdueRentals);
     }
 

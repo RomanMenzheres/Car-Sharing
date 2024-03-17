@@ -108,9 +108,8 @@ public class RentalServiceTest {
     }
 
     @Test
-    @DisplayName("Verify findAllByUserAndActivity() method works when userId is null")
-    public void findAllByUserAndActivity_UserIdNull_ReturnsAllRentals() {
-        Long userId = null;
+    @DisplayName("Verify findAllByActivity() method works")
+    public void findAllByActivity_ValidData_ReturnsAllRentals() {
         boolean isActive = true;
         Rental rental = RentalSupplier.getRental();
         RentalDto rentalDto = RentalSupplier.getRentalDto();
@@ -118,14 +117,14 @@ public class RentalServiceTest {
         List<Rental> rentals = List.of(rental);
         Page<Rental> rentalPage = new PageImpl<>(rentals, pageable, rentals.size());
 
-        when(rentalRepository.findAll(pageable)).thenReturn(rentalPage);
+        when(rentalRepository.findAllByActivity(isActive, pageable)).thenReturn(rentalPage);
         when(rentalMapper.toDto(rental)).thenReturn(rentalDto);
 
-        List<RentalDto> actual = rentalService.findAllByUserAndActivity(userId, isActive, pageable);
+        List<RentalDto> actual = rentalService.findAllByActivity(isActive, pageable);
 
         assertThat(actual).hasSize(1);
         assertThat(actual.get(0)).isEqualTo(rentalDto);
-        verify(rentalRepository, times(1)).findAll(pageable);
+        verify(rentalRepository, times(1)).findAllByActivity(isActive, pageable);
         verify(rentalMapper, times(1)).toDto(rental);
         verifyNoMoreInteractions(rentalRepository, rentalMapper);
     }

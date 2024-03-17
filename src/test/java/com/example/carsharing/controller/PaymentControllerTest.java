@@ -2,6 +2,7 @@ package com.example.carsharing.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -10,7 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.carsharing.dto.payment.CreatePaymentRequestDto;
 import com.example.carsharing.dto.payment.PaymentDto;
 import com.example.carsharing.supplier.PaymentSupplier;
+import com.example.carsharing.util.StripeUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stripe.exception.InvalidRequestException;
+import com.stripe.model.checkout.Session;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -20,8 +24,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
@@ -33,11 +40,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PaymentControllerTest {
     protected static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @MockBean
+    private StripeUtil stripeUtil;
 
     @BeforeAll
     static void beforeAll(
@@ -150,8 +160,12 @@ public class PaymentControllerTest {
     )
     @DisplayName("Success payment by valid session id test")
     void successPayment_ValidSessionId_Success() throws Exception {
-        PaymentDto expected = PaymentSupplier.getSuccessPaymentDto();
         String id = "cs_test_a1OOcLaCUOFF9gl6xPr0YEzC5hbRt9hHBZuJc6AnMB2oO6WzEXK9SAHUd7";
+        Session session = new Session();
+        session.setStatus("complete");
+        PaymentDto expected = PaymentSupplier.getSuccessPaymentDto();
+
+        when(stripeUtil.retrieveSession(id)).thenReturn(session);
 
         MvcResult result = mockMvc.perform(
                         get("/payments/success?session_id=" + id)
@@ -170,8 +184,12 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("Success payment by invalid session id test")
     void successPayment_InvalidSessionId_NotFound() throws Exception {
+        String id = "NotFoundSessionId";
+
+        when(stripeUtil.retrieveSession(id)).thenThrow(InvalidRequestException.class);
+
         mockMvc.perform(
-                        get("/payments/success?session_id=NotFoundSessionId")
+                        get("/payments/success?session_id=" + id)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andReturn();
@@ -185,8 +203,12 @@ public class PaymentControllerTest {
     )
     @DisplayName("Cancel payment by valid session id test")
     void cancelPayment_ValidSessionId_Success() throws Exception {
-        PaymentDto expected = PaymentSupplier.getCanceledPaymentDto();
         String id = "cs_test_a1OOcLaCUOFF9gl6xPr0YEzC5hbRt9hHBZuJc6AnMB2oO6WzEXK9SAHUd7";
+        Session session = new Session();
+        session.setStatus("open");
+        PaymentDto expected = PaymentSupplier.getCanceledPaymentDto();
+
+        when(stripeUtil.retrieveSession(id)).thenReturn(session);
 
         MvcResult result = mockMvc.perform(
                         get("/payments/cancel?session_id=" + id)
@@ -205,8 +227,12 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("Cancel payment by invalid session id test")
     void cancelPayment_InvalidSessionId_NotFound() throws Exception {
+        String id = "NotFoundSessionId";
+
+        when(stripeUtil.retrieveSession(id)).thenThrow(InvalidRequestException.class);
+
         mockMvc.perform(
-                        get("/payments/success?session_id=NotFoundSessionId")
+                        get("/payments/success?session_id=" + id)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andReturn();

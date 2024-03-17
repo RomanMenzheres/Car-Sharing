@@ -13,6 +13,8 @@ public interface RentalService {
 
     List<RentalDto> findAllByUserAndActivity(Long userId, boolean isActive, Pageable pageable);
 
+    List<RentalDto> findAllByActivity(boolean isActive, Pageable pageable);
+
     List<RentalDto> findAllByUser(Long userId, Pageable pageable);
 
     RentalWithDetailedCarInfoDto returnRental(Long id);

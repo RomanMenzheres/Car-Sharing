@@ -56,7 +56,11 @@ public class RentalController {
             @RequestParam(name = "is_active", defaultValue = "true") boolean isActive,
             Pageable pageable
     ) {
-        return rentalService.findAllByUserAndActivity(userId, isActive, pageable);
+        if (userId == null) {
+            return rentalService.findAllByActivity(isActive, pageable);
+        } else {
+            return rentalService.findAllByUserAndActivity(userId, isActive, pageable);
+        }
     }
 
     @Operation(summary = "Get Rental By Id", description = "Get Rental by id")

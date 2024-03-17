@@ -200,4 +200,23 @@ public class RentalControllerTest {
         assertEquals(expected.size(), actual.length);
         assertEquals(expected, Arrays.stream(actual).toList());
     }
+
+    @WithMockUser(username = "admin", authorities = {"MANAGER"})
+    @Test
+    @DisplayName("Get all rentals by user and activity test")
+    void getRentalsByUserAndActivity_UserIdIsNull_Success() throws Exception {
+        List<RentalDto> expected = RentalSupplier.getAllActiveRentals();
+
+        MvcResult result = mockMvc.perform(
+                        get("/rentals?is_active=true")
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        RentalDto[] actual = objectMapper.readValue(
+                result.getResponse().getContentAsByteArray(), RentalDto[].class);
+
+        assertEquals(expected.size(), actual.length);
+        assertEquals(expected, Arrays.stream(actual).toList());
+    }
 }

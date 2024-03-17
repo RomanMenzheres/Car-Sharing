@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class StripePaymentServiceImpl implements PaymentService {
+    public static final String SESSION_COMPLETE_STATUS = "complete";
+    public static final String SESSION_OPEN_STATUS = "open";
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final RentalService rentalService;
@@ -57,18 +59,37 @@ public class StripePaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto success(String sessionId) {
-        Payment payment = findBySessionId(sessionId);
-        payment.setStatus(Payment.PaymentStatus.PAID);
-        PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
-        notificationService.onSuccessfulPayment(paymentDto, payment.getRental().getUser().getId());
-        return paymentDto;
+        try {
+            Session session = stripeUtil.retrieveSession(sessionId);
+            if (!session.getStatus().equals(SESSION_COMPLETE_STATUS)) {
+                throw new PaymentException("Payment with session id: " + sessionId
+                        + " is not paid!");
+            }
+            Payment payment = findBySessionId(sessionId);
+            payment.setStatus(Payment.PaymentStatus.PAID);
+            PaymentDto paymentDto = paymentMapper.toDto(paymentRepository.save(payment));
+            notificationService.onSuccessfulPayment(paymentDto,
+                    payment.getRental().getUser().getId());
+            return paymentDto;
+        } catch (StripeException e) {
+            throw new EntityNotFoundException("Can't find payment by session id: " + sessionId, e);
+        }
     }
 
     @Override
     public PaymentDto cancel(String sessionId) {
-        Payment payment = findBySessionId(sessionId);
-        payment.setStatus(Payment.PaymentStatus.CANCELED);
-        return paymentMapper.toDto(paymentRepository.save(payment));
+        try {
+            Session session = stripeUtil.retrieveSession(sessionId);
+            if (!session.getStatus().equals(SESSION_OPEN_STATUS)) {
+                throw new PaymentException("Payment with session id: " + sessionId
+                        + " is not open!");
+            }
+            Payment payment = findBySessionId(sessionId);
+            payment.setStatus(Payment.PaymentStatus.CANCELED);
+            return paymentMapper.toDto(paymentRepository.save(payment));
+        } catch (StripeException e) {
+            throw new EntityNotFoundException("Can't find payment by session id: " + sessionId, e);
+        }
     }
 
     private Payment findBySessionId(String sessionId) {

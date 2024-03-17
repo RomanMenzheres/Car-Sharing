@@ -74,6 +74,21 @@ public class RentalSupplier {
         return List.of(getRentalDtoWithId2());
     }
 
+    public static List<RentalDto> getAllActiveRentals() {
+        return List.of(
+                getRentalDtoWithId2(),
+
+                new RentalDto(
+                        4L,
+                        2L,
+                        4L,
+                        LocalDate.of(2024, 3, 8),
+                        LocalDate.of(2025, 3, 14),
+                        null
+                )
+        );
+    }
+
     private static RentalDto getRentalDtoWithId2() {
         return new RentalDto(
                 2L,
