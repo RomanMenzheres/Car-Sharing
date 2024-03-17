@@ -58,7 +58,7 @@ public class StripePaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDto success(String sessionId) {
+    public PaymentDto succeed(String sessionId) {
         try {
             Session session = stripeUtil.retrieveSession(sessionId);
             if (!session.getStatus().equals(SESSION_COMPLETE_STATUS)) {

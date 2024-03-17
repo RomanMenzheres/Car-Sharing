@@ -58,9 +58,9 @@ public class RentalController {
     ) {
         if (userId == null) {
             return rentalService.findAllByActivity(isActive, pageable);
-        } else {
-            return rentalService.findAllByUserAndActivity(userId, isActive, pageable);
         }
+
+        return rentalService.findAllByUserAndActivity(userId, isActive, pageable);
     }
 
     @Operation(summary = "Get Rental By Id", description = "Get Rental by id")

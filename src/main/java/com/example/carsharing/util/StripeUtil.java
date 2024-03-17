@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StripeUtil {
+    public static final BigDecimal CENT_MULTIPLIER = new BigDecimal(100);
+    public static final Long DEFAULT_QUANTITY = 1L;
     private static final String DEFAULT_CURRENCY = "usd";
     @Value("${stripe.success.link}")
     private String successUrl;
@@ -27,7 +29,7 @@ public class StripeUtil {
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
-                                .setQuantity(1L)
+                                .setQuantity(DEFAULT_QUANTITY)
                                 .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
                                         .setCurrency(DEFAULT_CURRENCY)
                                         .setUnitAmountDecimal(convertToCents(amount))
@@ -45,7 +47,7 @@ public class StripeUtil {
     }
 
     private BigDecimal convertToCents(BigDecimal amount) {
-        return amount.multiply(new BigDecimal(100));
+        return amount.multiply(CENT_MULTIPLIER);
     }
 
     public Session retrieveSession(String sessionId) throws StripeException {
