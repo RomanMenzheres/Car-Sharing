@@ -39,13 +39,13 @@ public class PaymentController {
     }
 
     @Operation(summary = "Payment Successful", description = "Success endpoint for payment")
-    @PostMapping("/success")
+    @GetMapping("/success")
     public PaymentDto succeedPayment(@RequestParam("session_id") String sessionId) {
         return paymentService.succeed(sessionId);
     }
 
     @Operation(summary = "Payment Canceled", description = "Cancel endpoint for payment")
-    @PostMapping("/cancel")
+    @GetMapping("/cancel")
     public PaymentDto cancelPayment(@RequestParam("session_id") String sessionId) {
         return paymentService.cancel(sessionId);
     }
