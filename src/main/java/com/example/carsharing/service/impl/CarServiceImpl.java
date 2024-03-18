@@ -4,18 +4,19 @@ import com.example.carsharing.dto.car.CarDto;
 import com.example.carsharing.dto.car.CarWithShortInfoDto;
 import com.example.carsharing.dto.car.CreateCarRequestDto;
 import com.example.carsharing.exception.EntityNotFoundException;
+import com.example.carsharing.exception.NoAvailableCarsException;
 import com.example.carsharing.mapper.CarMapper;
 import com.example.carsharing.model.Car;
 import com.example.carsharing.repository.CarRepository;
 import com.example.carsharing.service.CarService;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
@@ -49,5 +50,21 @@ public class CarServiceImpl implements CarService {
     @Override
     public void delete(Long id) {
         carRepository.deleteById(id);
+    }
+
+    @Override
+    public void rentalCar(Car car) {
+        boolean isAvailable = car.getInventory() > 0;
+        if (!isAvailable) {
+            throw new NoAvailableCarsException("There no available cars with id: " + car.getId()
+                    + " at the moment");
+        }
+
+        car.setInventory(car.getInventory() - 1);
+    }
+
+    @Override
+    public void returnRentalCar(Car car) {
+        car.setInventory(car.getInventory() + 1);
     }
 }

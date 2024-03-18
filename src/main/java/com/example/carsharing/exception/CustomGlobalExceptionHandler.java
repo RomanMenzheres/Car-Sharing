@@ -1,5 +1,6 @@
 package com.example.carsharing.exception;
 
+import io.jsonwebtoken.JwtException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,10 +38,14 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(
             {
                     RegistrationException.class,
-                    EntityNotFoundException.class
+                    EntityNotFoundException.class,
+                    RentalIsNotActiveException.class,
+                    NoAvailableCarsException.class,
+                    JwtException.class,
+                    RentalIsAlreadyPaid.class
             }
     )
-    public ResponseEntity<Object> handleRegistrationException(
+    public ResponseEntity<Object> handleException(
             RuntimeException exception
     ) {
         HttpStatus status = getStatus(exception);
@@ -70,6 +75,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             status = HttpStatus.CONFLICT;
         } else if (exception instanceof EntityNotFoundException) {
             status = HttpStatus.NOT_FOUND;
+        } else if (exception instanceof JwtException) {
+            status = HttpStatus.UNAUTHORIZED;
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
