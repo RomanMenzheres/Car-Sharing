@@ -43,7 +43,11 @@ Car Sharing is a service for renting cars. API supports different operations:
 **Thrird party API:**
 * Telegram API
 * Stripe API
-  
+
+## Architecture Diagram
+![image](https://github.com/RomanMenzheres/Car-Sharing/assets/118287818/dacc0cd1-d7e6-4164-8e41-7b0b90fcef93)
+
+
 ## Endpoints
 **AuthController:** Handles registration and login requests, supporting both Basic and JWT authentication.
 * `POST: /auth/registration` - The endpoint for registration.
